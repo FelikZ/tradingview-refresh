@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+TV_APP="/Applications/TradingView.app"
+
+CWD="$(pwd)"
+if [ "$BASH_SOURCE" != "" ]
+then
+    DIR="$( cd "$( dirname "$BASH_SOURCE" )" && pwd )"
+elif [ "$DASH_SOURCE" != "" ]
+then
+    DIR="$( cd "$( dirname "$DASH_SOURCE" )" && pwd )"
+else
+    DIR="$( cd "$( dirname "$0" )" && pwd )"
+fi
+
+if [ ! -d "$TV_APP" ]; then
+    echo "TradingView app not found"
+    exit 1
+fi
+
+# Function to kill TradingView processes
+kill_tradingview() {
+    local pids=$(pgrep -f "^$TV_APP")
+    
+    if [ -n "$pids" ]; then
+        echo "Terminating TradingView processes..."
+
+        osascript -e 'quit app "TradingView"'
+
+        # Wait until all matching processes have been terminated
+        while pgrep -f "^$TV_APP" > /dev/null; do
+            sleep 0.1
+        done
+        
+        echo "All TradingView processes have been terminated."
+    else
+        echo "No TradingView processes found."
+    fi
+}
+
+# Kill TradingView processes
+kill_tradingview
+
+# Launch the middleware app
+output=$(arch -arm64 "$DIR/tradingview-refresh" -p 9222 -app "$TV_APP/Contents/MacOS/TradingView" 2>&1)
+
+is_alerts=$(echo $output | grep -q 'No alerts needs to be extended'; EC=$?; echo $EC)
+
+notification="No alerts updated"
+if [ "$is_alerts" == '1' ]; then
+    lines=$(echo "$output" | wc -l)
+    notification="$lines alerts updated"
+fi
+
+
+osascript <<EOF
+display notification "$notification" with title "TradingViewRefresh"
+EOF
+
+echo "This window will close in 5 seconds"
+sleep 5
+
+# Close the terminal window
+# (sleep 2 && osascript -e 'tell application "Terminal" to close (every window whose name contains "tradingview-refresh")') &

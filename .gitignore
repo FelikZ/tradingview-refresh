@@ -1,2 +1,4 @@
+.DS_Store
 /electron-debugger*
 /tradingview-refresh*
+/launchers/TradingViewRefresh.app/Contents/MacOS/tradingview-refresh
