@@ -1,14 +1,8 @@
-The goal is to have alerts to auto refreshed.
+This program is intended to extend existing TradingView alerts on Desktop app startup.
 
-## Debug TradingView (Mac)
+It excludes alerts that are have created and living withing "today" to avoid day-trading alerts.
 
-```bash
-# will inject scripts to tradingview
-pip install electron-inject
-
-# launch debugger in browser
-python -m electron_inject -s -b - /Applications/TradingView.app/Contents/MacOS/TradingView --remote-allow-origins='http://localhost:*'
-```
+It extends +60 days all alerts which expiring date is less then 59 days away from today.
 
 ## Mac
 
@@ -30,4 +24,14 @@ C:\Program Files\TradingViewRefresh
 # Create a shortcut on Desktop->New->Shortcut
 powershell.exe -File "C:\Program Files\TradingViewRefresh\tradingview-refresh.ps1"
 # Optionally pin to 
+```
+
+## Debug TradingView (Mac)
+
+```bash
+# will inject scripts to tradingview
+pip install electron-inject
+
+# launch debugger in browser
+python -m electron_inject -s -b - /Applications/TradingView.app/Contents/MacOS/TradingView --remote-allow-origins='http://localhost:*'
 ```
