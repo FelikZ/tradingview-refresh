@@ -13,14 +13,21 @@ python -m electron_inject -s -b - /Applications/TradingView.app/Contents/MacOS/T
 ## Mac
 
 ```bash
-go build -o electron-debugger
-./electron-debugger -p 9222 -app /Applications/TradingView.app/Contents/MacOS/TradingView
+go build -o tradingview-refresh
+./tradingview-refresh -p 9222 -app /Applications/TradingView.app/Contents/MacOS/TradingView
 ```
 
 ## Windows
 
 ```powershell
-# you can find TradingView.exe path through task manager (CTRL+SHIFT+ESC) and the properties
-go build -o electron-debugger.exe
-./electron-debugger.exe -p 9222 -app "C:\Program Files\WindowsApps\TradingView.Desktop_2.9.2.6491_x64__n534cwy3pjxzj\TradingView.exe"
+# build executable
+go build -o tradingview-refresh.exe
+# Create a directory
+C:\Program Files\TradingViewRefresh
+
+# Copy both executable AND ./launchers/tradingview-refresh.ps1 to that dir
+
+# Create a shortcut on Desktop->New->Shortcut
+powershell.exe -File "C:\Program Files\TradingViewRefresh\tradingview-refresh.ps1"
+# Optionally pin to 
 ```

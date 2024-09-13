@@ -14,6 +14,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+const MAX_EXTENSION_PERIOD_DAYS time.Duration = 60
+
 type Window struct {
 	WebSocketDebuggerURL string `json:"webSocketDebuggerUrl"`
 	WS                   *websocket.Conn
@@ -120,20 +122,14 @@ func main() {
 		log.Fatalf("Failed to get and filter alerts: %v", err)
 	}
 
-	refreshAlerts(window, filteredAlerts)
-
-	// fmt.Printf("Filtered Alerts:\n")
-	// for _, alert := range filteredAlerts {
-	// 	printName := "<empty name>"
-	// 	if alert.Name != nil {
-	// 		printName = *alert.Name
-	// 	}
-
-	// 	fmt.Printf("- %s (Symbol: %s, Res: %s, Expires: %s)\n", printName, alert.Symbol, alert.Resolution, alert.Expiration)
-	// }
+	if len(filteredAlerts) < 1 {
+		fmt.Println("No alerts needs to be extended.")
+	} else {
+		refreshAlerts(window, filteredAlerts)
+	}
 
 	// Kill the Electron process
-	cmd.Process.Kill()
+	//cmd.Process.Kill()
 	// process.Kill()
 }
 
@@ -276,7 +272,7 @@ func getAndFilterAlerts(window Window) ([]Alert, error) {
 	// Get the end of today (just before the start of the next day)
 	endOfToday := startOfToday.Add(24 * time.Hour).Add(-time.Nanosecond)
 
-	maxDate := startOfToday.Add(60 * 24 * time.Hour).Add(-time.Nanosecond)
+	maxDate := startOfToday.Add((MAX_EXTENSION_PERIOD_DAYS - 1) * 24 * time.Hour).Add(-time.Nanosecond)
 
 	var filteredAlerts []Alert
 	for _, alert := range *alertResp.Alerts {
@@ -343,7 +339,7 @@ func refreshAlerts(window Window, alerts []Alert) error {
 		0, 0, 0, 0,
 		time.Local,
 	)
-	maxDate := startOfToday.Add(60 * 24 * time.Hour).Add(-time.Nanosecond)
+	maxDate := startOfToday.Add(MAX_EXTENSION_PERIOD_DAYS * 24 * time.Hour).Add(-time.Nanosecond)
 
 	for _, alert := range alerts {
 		alert.Expiration = maxDate.Format(time.RFC3339)
