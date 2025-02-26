@@ -94,7 +94,7 @@ func main() {
 	}
 
 	// Wait for the app to start
-	time.Sleep(7 * time.Second)
+	time.Sleep(15 * time.Second)
 
 	// Get WebSocket URL
 	windows, err := getWindows(*port)
