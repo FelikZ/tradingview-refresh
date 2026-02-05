@@ -1,24 +1,26 @@
 (function initBlockDetector() {
     const BLOCKS = {
-        "forecast": 'span[class^="chartTitle-"]'
+        "FinYear": 'button#FY'
     };
 
     const ACTIONS = {
-        "forecast": function () {
+        "FinYear": function () {
             document.querySelectorAll('#FY').forEach(el => el.click());
         }
     };
 
-    const activeBlocks = new Set();
     const INTERVAL_MS = 500;
 
     function checkBlocks() {
         for (const [blockName, selector] of Object.entries(BLOCKS)) {
             const elements = document.querySelectorAll(selector);
-            const isPresent = elements.length > 0;
 
-            if (isPresent && !activeBlocks.has(blockName)) {
-                activeBlocks.add(blockName);
+            elements.forEach(element => {
+                if (element.getAttribute('twr_block') === '1') {
+                    return;
+                }
+
+                element.setAttribute('twr_block', '1');
                 console.log(`[BlockDetector] Block "${blockName}" detected`);
 
                 if (ACTIONS[blockName]) {
@@ -29,10 +31,7 @@
                         console.error(`[BlockDetector] Action error for "${blockName}":`, e);
                     }
                 }
-            } else if (!isPresent && activeBlocks.has(blockName)) {
-                activeBlocks.delete(blockName);
-                console.log(`[BlockDetector] Block "${blockName}" gone`);
-            }
+            });
         }
     }
 

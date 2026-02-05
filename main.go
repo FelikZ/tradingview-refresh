@@ -137,8 +137,7 @@ func main() {
 		if err != nil {
 			log.Printf("Warning: Failed to init block detector: %v", err)
 		} else {
-			value, _ := parseJSResult(result)
-			log.Printf("Block detector: %s", value)
+			_, _ = parseJSResult(result)
 		}
 	}
 
@@ -332,6 +331,7 @@ func refreshAlerts(window Window, alerts []Alert) error {
 	for _, alert := range alerts {
 		alert.Expiration = maxDate.Format(time.RFC3339)
 		alert.Active = true
+		alert.IgnoreWarnings = true
 
 		jsonAlert, err := json.Marshal(alert)
 		if err != nil {
