@@ -25,7 +25,17 @@
 
             console.log(reported, estimates);
 
-            const parse = str => parseFloat(str);
+            const parse = str => {
+                const trimmed = str.trim();
+                const match = trimmed.match(/^(-?[\d.,]+)\s*([KMBT])?$/i);
+                if (!match) return NaN;
+
+                const numericPart = parseFloat(match[1].replace(',', ''));
+                const suffix = (match[2] || '').toUpperCase();
+
+                const multipliers = { 'K': 1e3, 'M': 1e6, 'B': 1e9, 'T': 1e12 };
+                return numericPart * (multipliers[suffix] || 1);
+            };
 
             let lastReportedVal, lastReportedIdx;
             for (let i = reported.length - 1; i >= 0; i--) {
