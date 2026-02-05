@@ -30,7 +30,6 @@
             let lastReportedVal, lastReportedIdx;
             for (let i = reported.length - 1; i >= 0; i--) {
                 const val = parse(reported[i]);
-                console.log(reported[i], val, parseFloat(reported[i]));
                 if (!isNaN(val)) {
                     lastReportedVal = val;
                     lastReportedIdx = i;
@@ -48,6 +47,29 @@
                 }
             }
 
+            let historicCompoundGrowth = null;
+            if (lastReportedIdx !== undefined && lastReportedIdx > 0) {
+                let historicStartVal, historicStartIdx;
+                const lookbackLimit = Math.max(0, lastReportedIdx - 4);
+                for (let i = lookbackLimit; i < lastReportedIdx; i++) {
+                    const val = parse(reported[i]);
+                    if (!isNaN(val)) {
+                        historicStartVal = val;
+                        historicStartIdx = i;
+                        break;
+                    }
+                }
+                if (historicStartIdx !== undefined && historicStartVal !== 0) {
+                    const years = lastReportedIdx - historicStartIdx;
+                    if (years > 0) {
+                        const ratio = lastReportedVal / historicStartVal;
+                        if (ratio > 0) {
+                            historicCompoundGrowth = Number(Math.pow(ratio, 1 / years).toFixed(3));
+                        }
+                    }
+                }
+            }
+
             let avgCompoundGrowth = null;
             if (lastReportedIdx !== undefined && lastEstimateIdx !== undefined) {
                 const years = lastEstimateIdx - lastReportedIdx;
@@ -59,8 +81,11 @@
                 }
             }
 
-            if (avgCompoundGrowth !== null) {
-                blockElement.querySelector('div[class^="shadedLayer"] span[class^="content-"]').textContent = `ANNUAL FORECAST ${((avgCompoundGrowth - 1) * 100).toFixed(2)}%`
+            const historicStr = historicCompoundGrowth !== null ? `${((historicCompoundGrowth - 1) * 100).toFixed(2)}%` : 'N/A';
+            const forecastStr = avgCompoundGrowth !== null ? `${((avgCompoundGrowth - 1) * 100).toFixed(2)}%` : 'N/A';
+
+            if (historicCompoundGrowth !== null || avgCompoundGrowth !== null) {
+                blockElement.querySelector('div[class^="shadedLayer"] span[class^="content-"]').textContent = `Annual HISTORIC ${historicStr} / FORECAST ${forecastStr}`;
             }
         }
     };
