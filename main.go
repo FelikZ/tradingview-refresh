@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -13,6 +14,17 @@ import (
 
 	"github.com/gorilla/websocket"
 )
+
+//go:embed js/*
+var jsFS embed.FS
+
+func loadJSFile(filename string) (string, error) {
+	content, err := jsFS.ReadFile("js/" + filename)
+	if err != nil {
+		return "", err
+	}
+	return string(content), nil
+}
 
 const MAX_EXTENSION_PERIOD_DAYS time.Duration = 60
 
@@ -116,6 +128,20 @@ func main() {
 
 	window.WS = c
 
+	// Initialize block detector
+	jsBlockDetector, err := loadJSFile("03_block_detector.js")
+	if err != nil {
+		log.Printf("Warning: Failed to load block detector: %v", err)
+	} else {
+		result, err := evalJSRaw(window, jsBlockDetector)
+		if err != nil {
+			log.Printf("Warning: Failed to init block detector: %v", err)
+		} else {
+			value, _ := parseJSResult(result)
+			log.Printf("Block detector: %s", value)
+		}
+	}
+
 	// Get and filter alerts
 	filteredAlerts, err := getAndFilterAlerts(window)
 	if err != nil {
@@ -201,30 +227,10 @@ func parseJSResult(response map[string]interface{}) (string, error) {
 }
 
 func getAndFilterAlerts(window Window) ([]Alert, error) {
-	// jsCode := `
-	// 	fetch("https://pricealerts.tradingview.com/list_alerts", {"credentials": "include"})
-	// 		.then(response => response.json())
-	// 		.catch(error => ({error: error.toString()}))
-	// `
-	jsCode := `
-		(function fetchAlertsSync() {
-			const xhr = new XMLHttpRequest();
-			xhr.open("GET", "https://pricealerts.tradingview.com/list_alerts", false);
-			xhr.withCredentials = true;
-
-			try {
-				xhr.send();
-
-				if (xhr.status >= 200 && xhr.status < 300) {
-					return xhr.responseText;
-				} else {
-					return null;
-				}
-			} catch (error) {
-				return null;
-			}
-		})();
-	`
+	jsCode, err := loadJSFile("01_fetch_alerts.js")
+	if err != nil {
+		return nil, fmt.Errorf("failed to load JS file: %v", err)
+	}
 
 	rawResult, err := evalJSRaw(window, jsCode)
 	if err != nil {
@@ -310,28 +316,10 @@ func getAndFilterAlerts(window Window) ([]Alert, error) {
 }
 
 func refreshAlerts(window Window, alerts []Alert) error {
-	jsCodeTpl := `
-		(function refreshAlerts() {
-			const xhr = new XMLHttpRequest();
-			xhr.open("POST", "https://pricealerts.tradingview.com/modify_restart_alert", false);
-			xhr.withCredentials = true;
-			xhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8")
-
-			let body = "{\"payload\":%s}"
-
-			try {
-				xhr.send(body);
-
-				if (xhr.status >= 200 && xhr.status < 300) {
-					return xhr.responseText;
-				} else {
-					return null;
-				}
-			} catch (error) {
-				return null;
-			}
-		})();
-	`
+	jsCodeTpl, err := loadJSFile("02_refresh_alerts.js.tpl")
+	if err != nil {
+		return fmt.Errorf("failed to load JS template: %v", err)
+	}
 
 	now := time.Now()
 	startOfToday := time.Date(

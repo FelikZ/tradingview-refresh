@@ -9,6 +9,9 @@ It extends +60 days all alerts which expiring date is less then 59 days away fro
 ```bash
 GOARCH=arm64 GOOS=darwin go build -o ./launchers/TradingViewRefresh.app/Contents/MacOS/tradingview-refresh
 
+mkdir -p ./launchers/TradingViewRefresh.app/js
+cp -r ./js/* ./launchers/TradingViewRefresh.app/js/
+
 # Copy ./launchers/TradingViewRefresh.app to /Applications/ dir
 open ./launchers
 open /Applications
@@ -29,12 +32,3 @@ powershell.exe -File "C:\Program Files\TradingViewRefresh\tradingview-refresh.ps
 # Optionally pin to 
 ```
 
-## Debug TradingView (Mac)
-
-```bash
-# will inject scripts to tradingview
-pip install electron-inject
-
-# launch debugger in browser
-python -m electron_inject -s -b - /Applications/TradingView.app/Contents/MacOS/TradingView --remote-allow-origins='http://localhost:*'
-```
