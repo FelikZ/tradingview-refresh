@@ -16,5 +16,5 @@ while ($process) {
 
 & "$PSScriptRoot/tradingview-refresh.exe" -p 9222 -app "$env:TV_DIR\TradingView.exe" 2>&1
 
-echo "This window will close in 10 seconds"
-Start-Sleep -Seconds 10
+echo "This window will close in 30 seconds"
+Start-Sleep -Seconds 30

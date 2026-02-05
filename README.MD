@@ -25,6 +25,7 @@ go build -o tradingview-refresh.exe
 # Create a directory
 C:\Program Files\TradingViewRefresh
 
+# Copy js files to that dir
 # Copy both executable AND ./launchers/tradingview-refresh.ps1 to that dir
 
 # Create a shortcut on Desktop->New->Shortcut

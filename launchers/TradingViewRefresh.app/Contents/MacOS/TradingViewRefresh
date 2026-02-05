@@ -3,14 +3,12 @@
 TV_APP="/Applications/TradingView.app"
 
 CWD="$(pwd)"
-if [ "$BASH_SOURCE" != "" ]
-then
-    DIR="$( cd "$( dirname "$BASH_SOURCE" )" && pwd )"
-elif [ "$DASH_SOURCE" != "" ]
-then
-    DIR="$( cd "$( dirname "$DASH_SOURCE" )" && pwd )"
+if [ "$BASH_SOURCE" != "" ]; then
+    DIR="$(cd "$(dirname "$BASH_SOURCE")" && pwd)"
+elif [ "$DASH_SOURCE" != "" ]; then
+    DIR="$(cd "$(dirname "$DASH_SOURCE")" && pwd)"
 else
-    DIR="$( cd "$( dirname "$0" )" && pwd )"
+    DIR="$(cd "$(dirname "$0")" && pwd)"
 fi
 
 if [ ! -d "$TV_APP" ]; then
@@ -21,17 +19,17 @@ fi
 # Function to kill TradingView processes
 kill_tradingview() {
     local pids=$(pgrep -f "^$TV_APP")
-    
+
     if [ -n "$pids" ]; then
         echo "Terminating TradingView processes..."
 
         osascript -e 'quit app "TradingView"'
 
         # Wait until all matching processes have been terminated
-        while pgrep -f "^$TV_APP" > /dev/null; do
+        while pgrep -f "^$TV_APP" >/dev/null; do
             sleep 0.1
         done
-        
+
         echo "All TradingView processes have been terminated."
     else
         echo "No TradingView processes found."
@@ -41,24 +39,48 @@ kill_tradingview() {
 # Kill TradingView processes
 kill_tradingview
 
-# Launch the middleware app
-output=$(arch -arm64 "$DIR/tradingview-refresh" -p 9222 -app "$TV_APP/Contents/MacOS/TradingView" 2>&1)
+# Create a temporary script to run in Terminal
+TEMP_SCRIPT="/tmp/tradingview_refresh_runner.command"
 
-is_alerts=$(echo $output | grep -q 'No alerts needs to be extended'; EC=$?; echo $EC)
+cat >"$TEMP_SCRIPT" <<SCRIPT_EOF
+#!/usr/bin/env bash
+DIR="$DIR"
+TV_APP="$TV_APP"
+
+echo "=== TradingView Refresh ==="
+echo ""
+
+# Run the binary and capture output while displaying it
+arch -arm64 "\$DIR/tradingview-refresh" -p 9222 -app "\$TV_APP/Contents/MacOS/TradingView" 2>&1 | tee /tmp/tradingview_refresh_output.txt
+
+output=\$(cat /tmp/tradingview_refresh_output.txt)
+is_alerts=\$(echo "\$output" | grep -q 'No alerts needs to be extended'; EC=\$?; echo \$EC)
 
 notification="No alerts updated"
-if [ "$is_alerts" == '1' ]; then
-    lines=$(echo "$output" | wc -l)
-    notification="$lines alerts updated"
+if [ "\$is_alerts" == '1' ]; then
+    lines=\$(echo "\$output" | wc -l)
+    notification="\$lines alerts updated"
 fi
 
+osascript -e "display notification \"\$notification\" with title \"TradingViewRefresh\""
 
-osascript <<EOF
-display notification "$notification" with title "TradingViewRefresh"
-EOF
+echo ""
+echo "=== Completed ==="
+echo "This window will close in 30 seconds..."
 
-echo "This window will close in 5 seconds"
-sleep 5
+for i in \$(seq 30 -1 1); do
+    printf "\rClosing in %2d seconds..." "\$i"
+    sleep 1
+done
 
-# Close the terminal window
-# (sleep 2 && osascript -e 'tell application "Terminal" to close (every window whose name contains "tradingview-refresh")') &
+rm -f /tmp/tradingview_refresh_output.txt
+rm -f "\$0"
+
+# Close this Terminal window
+osascript -e 'tell application "Terminal" to close front window' &
+SCRIPT_EOF
+
+chmod +x "$TEMP_SCRIPT"
+
+# Use 'open' command which properly brings Terminal to foreground
+open -a Terminal "$TEMP_SCRIPT"
