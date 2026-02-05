@@ -7,14 +7,7 @@ It extends +60 days all alerts which expiring date is less then 59 days away fro
 ## Mac
 
 ```bash
-GOARCH=arm64 GOOS=darwin go build -o ./launchers/TradingViewRefresh.app/Contents/MacOS/tradingview-refresh
-
-mkdir -p ./launchers/TradingViewRefresh.app/js
-cp -r ./js/* ./launchers/TradingViewRefresh.app/js/
-
-# Copy ./launchers/TradingViewRefresh.app to /Applications/ dir
-open ./launchers
-open /Applications
+./install_macos.sh
 ```
 
 ## Windows
