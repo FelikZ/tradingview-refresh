@@ -23,7 +23,6 @@
                 .querySelectorAll('div[data-name="Estimate"] div[class^="values-"] div[class^="value"]')]
                 .map(e => sanitize(e.textContent));
 
-            console.log(reported, estimates);
 
             const parse = str => {
                 const trimmed = str.trim();
@@ -112,12 +111,10 @@
                 }
 
                 element.setAttribute('twr_block', '1');
-                console.log(`[BlockDetector] Block "${blockName}" detected`);
 
                 if (ACTIONS[blockName]) {
                     try {
                         ACTIONS[blockName](element);
-                        console.log(`[BlockDetector] Action for "${blockName}" executed`);
                     } catch (e) {
                         console.error(`[BlockDetector] Action error for "${blockName}":`, e);
                     }
@@ -127,13 +124,11 @@
     }
 
     if (window.__blockDetectorActive) {
-        console.log('[BlockDetector] Already running, skipping init');
         return 'already_initialized';
     }
 
     window.__blockDetectorActive = true;
     setInterval(checkBlocks, INTERVAL_MS);
-    console.log('[BlockDetector] Initialized with blocks:', Object.keys(BLOCKS));
 
     return 'initialized';
 })();
