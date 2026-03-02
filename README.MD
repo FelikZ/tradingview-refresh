@@ -19,16 +19,6 @@ It makes Annual tab active by default, instead of Quarterly.
 ## Windows
 
 ```powershell
-# build executable
-go build -o tradingview-refresh.exe
-# Create a directory
-C:\Program Files\TradingViewRefresh
-
-# Copy js files to that dir
-# Copy both executable AND ./launchers/tradingview-refresh.ps1 to that dir
-
-# Create a shortcut on Desktop->New->Shortcut
-powershell.exe -File "C:\Program Files\TradingViewRefresh\tradingview-refresh.ps1"
-# Optionally pin to 
+.\install_win.ps1
 ```
 
