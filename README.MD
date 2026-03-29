@@ -1,3 +1,5 @@
+## About
+
 This program is intended to extend existing TradingView alerts on Desktop app startup.
 
 It excludes alerts that are have created and living withing "today" to avoid day-trading alerts.
@@ -10,6 +12,12 @@ It extends +60 days all alerts which expiring date is less then 59 days away fro
 - It makes Annual tab active by default, instead of Quarterly.
 
 If you want to strip this behavior, remove `js/03_block_detector.js` etc addons and make your own build (documented below).
+
+## How it works
+
+It launches TradingView (Electron App) with debug port exposed and then injects JS code to extend functionality.
+
+The launcher is a terminal app and it will report alerts that are extended and will close automatically.
 
 ## Mac
 
