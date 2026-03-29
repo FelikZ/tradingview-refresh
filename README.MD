@@ -6,9 +6,10 @@ It extends +60 days all alerts which expiring date is less then 59 days away fro
 
 
 ## Bonus
-It extends all alerts withing "Forecast Math" block to show annual growth rates.
+- It extends all alerts withing "Forecast Math" block to show annual growth rates.
+- It makes Annual tab active by default, instead of Quarterly.
 
-It makes Annual tab active by default, instead of Quarterly.
+If you want to strip this behavior, remove `js/03_block_detector.js` etc addons and make your own build (documented below).
 
 ## Mac
 
@@ -29,7 +30,7 @@ brew install --cask tradingview-refresh
 brew update && brew upgrade --cask tradingview-refresh
 ```
 
-### Manual Install from Source
+### Manual build and install from Source
 
 ```bash
 ./install_macos.sh
@@ -40,7 +41,7 @@ brew update && brew upgrade --cask tradingview-refresh
 ### Using Pre-built Release
 Download `TradingViewRefresh-Windows.zip` from the latest [Release](https://github.com/FelikZ/tradingview-refresh/releases), extract it, and run the `install_win.ps1` script inside.
 
-### Manual Install from Source
+### Manual build and install from Source
 
 ```powershell
 .\install_win.ps1
