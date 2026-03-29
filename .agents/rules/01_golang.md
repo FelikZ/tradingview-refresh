@@ -2,11 +2,7 @@
 trigger: always_on
 ---
 
-# Go Best Practices for K8s Cronjobs
-
-This is a concise guide for writing robust, maintainable Go applications intended to run as non-interactive jobs, such as Kubernetes CronJobs.
-
------
+# Go Best Practices 
 
 ## Guidelines
 
