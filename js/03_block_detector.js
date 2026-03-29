@@ -9,7 +9,9 @@
             document.querySelectorAll('#FY').forEach(el => el.click());
         },
         "ForecastMath": function (blockElement) {
-            const sanitize = str => str.replace(/\p{Cf}/gu, '').replace('−', '-');
+            const sanitize = str => str.replace('−', '-').replace(/\p{Cf}/gu, '');
+
+            const lookBackYears = 4;
 
             let reported = [...blockElement
                 .parentElement
@@ -59,21 +61,25 @@
             let historicCompoundGrowth = null;
             if (lastReportedIdx !== undefined && lastReportedIdx > 0) {
                 let historicStartVal, historicStartIdx;
-                const lookbackLimit = Math.max(0, lastReportedIdx - 4);
-                for (let i = lookbackLimit; i < lastReportedIdx; i++) {
+                // -1 because we want to include the last reported value in the calculation
+                const lookbackLimit = Math.max(0, lastReportedIdx - (lookBackYears - 1));
+                console.log(lookbackLimit);
+                for (let i = lookbackLimit; i <= lastReportedIdx; i++) {
                     const val = parse(reported[i]);
-                    if (!isNaN(val)) {
+                    console.log(`val: ${val}, i: ${i}, reported[i]: ${reported[i]}`);
+                    if (!isNaN(val) && val > 0) {
                         historicStartVal = val;
                         historicStartIdx = i;
                         break;
                     }
                 }
+                console.log(`historicStartVal: ${historicStartVal}, historicStartIdx: ${historicStartIdx}`);
                 if (historicStartIdx !== undefined && historicStartVal !== 0) {
-                    const years = lastReportedIdx - historicStartIdx;
+                    const years = (lastReportedIdx - historicStartIdx) + 1;
                     if (years > 0) {
                         const ratio = lastReportedVal / historicStartVal;
                         if (ratio > 0) {
-                            historicCompoundGrowth = Number(Math.pow(ratio, 1 / years).toFixed(3));
+                            historicCompoundGrowth = Number(Math.pow(ratio, 1 / years).toFixed(4));
                         }
                     }
                 }
@@ -85,7 +91,7 @@
                 if (years > 0 && lastReportedVal !== 0) {
                     const ratio = lastEstimateVal / lastReportedVal;
                     if (ratio > 0) {
-                        avgCompoundGrowth = Number(Math.pow(ratio, 1 / years).toFixed(3));
+                        avgCompoundGrowth = Number(Math.pow(ratio, 1 / years).toFixed(4));
                     }
                 }
             }
@@ -94,7 +100,7 @@
             const forecastStr = avgCompoundGrowth !== null ? `${((avgCompoundGrowth - 1) * 100).toFixed(2)}%` : 'N/A';
 
             if (historicCompoundGrowth !== null || avgCompoundGrowth !== null) {
-                blockElement.querySelector('div[class^="shadedLayer"] span[class^="content-"]').textContent = `Annual HISTORIC ${historicStr} / FORECAST ${forecastStr}`;
+                blockElement.querySelector('div[class^="shadedLayer"] span[class^="content-"]').textContent = `HISTORIC ${historicStr} / FORECAST ${forecastStr}`;
             }
         }
     };
