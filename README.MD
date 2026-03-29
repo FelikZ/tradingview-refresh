@@ -45,4 +45,3 @@ Download `TradingViewRefresh-Windows.zip` from the latest [Release](https://gith
 ```powershell
 .\install_win.ps1
 ```
-
