@@ -1,0 +1,87 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '>=1.22.0'
+
+      - name: Get Version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Build macOS (.app bundle)
+        run: |
+          mkdir -p build-mac
+          cp -R launchers/TradingViewRefresh.app build-mac/
+          
+          # Build arm64 (Apple Silicon) per install_macos.sh
+          GOARCH=arm64 GOOS=darwin go build -o build-mac/TradingViewRefresh.app/Contents/MacOS/tradingview-refresh .
+          
+          # Embed js files
+          cp -r js build-mac/TradingViewRefresh.app/Contents/MacOS/js/
+          
+          # Compress to zip for release
+          cd build-mac
+          zip -r ../TradingViewRefresh-macOS.zip TradingViewRefresh.app
+          cd ..
+
+      - name: Build Windows
+        run: |
+          mkdir build-win
+          
+          # Build for Windows x64
+          GOARCH=amd64 GOOS=windows go build -o build-win/tradingview-refresh.exe .
+          
+          # Bundle installation files as expected by the script
+          cp install_win.ps1 build-win/
+          
+          mkdir -p build-win/launchers
+          cp launchers/tradingview-refresh.ps1 build-win/launchers/
+          cp -r js build-win/js/
+          
+          # Compress to zip for release
+          cd build-win
+          zip -r ../TradingViewRefresh-Windows.zip .
+          cd ..
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            TradingViewRefresh-macOS.zip
+            TradingViewRefresh-Windows.zip
+
+      - name: Update Homebrew Cask
+        run: |
+          git fetch origin main
+          git checkout main
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          SHA256=$(shasum -a 256 TradingViewRefresh-macOS.zip | awk '{print $1}')
+          
+          # Update version and sha256 in Cask file
+          sed -i '' "s/version \".*\"/version \"${VERSION}\"/" Casks/tradingview-refresh.rb
+          sed -i '' "s/sha256 \".*\"/sha256 \"${SHA256}\"/" Casks/tradingview-refresh.rb
+          
+          git add Casks/tradingview-refresh.rb
+          
+          # Commit and Push back to main
+          git commit -m "Bump Homebrew Cask to version ${VERSION} [skip ci]" || echo "No changes to commit"
+          git push origin main

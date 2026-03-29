@@ -12,11 +12,30 @@ It makes Annual tab active by default, instead of Quarterly.
 
 ## Mac
 
+### Using Homebrew (Recommended)
+
+```bash
+brew tap FelikZ/tradingview-refresh https://github.com/FelikZ/tradingview-refresh
+brew install --cask tradingview-refresh
+```
+
+*To upgrade via Homebrew:*
+```bash
+brew update && brew upgrade --cask tradingview-refresh
+```
+
+### Manual Install from Source
+
 ```bash
 ./install_macos.sh
 ```
 
 ## Windows
+
+### Using Pre-built Release
+Download `TradingViewRefresh-Windows.zip` from the latest [Release](https://github.com/FelikZ/tradingview-refresh/releases), extract it, and run the `install_win.ps1` script inside.
+
+### Manual Install from Source
 
 ```powershell
 .\install_win.ps1

@@ -15,22 +15,26 @@ $InstallDir = "C:\Program Files\TradingViewRefresh"
 Write-Host "=== TradingView Refresh Installer ===" -ForegroundColor Cyan
 Write-Host ""
 
-# Build the Go binary
-Write-Host "Building tradingview-refresh.exe..." -ForegroundColor Yellow
-$env:GOARCH = "amd64"
-$env:GOOS = "windows"
-Push-Location $ScriptDir
-try {
-    & go build -o "$ScriptDir\tradingview-refresh.exe" .
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "ERROR: Go build failed." -ForegroundColor Red
-        pause
-        exit 1
+# Build the Go binary if not running from a pre-built release package
+if (-not (Test-Path "$ScriptDir\tradingview-refresh.exe")) {
+    Write-Host "Building tradingview-refresh.exe..." -ForegroundColor Yellow
+    $env:GOARCH = "amd64"
+    $env:GOOS = "windows"
+    Push-Location $ScriptDir
+    try {
+        & go build -o "$ScriptDir\tradingview-refresh.exe" .
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "ERROR: Go build failed." -ForegroundColor Red
+            pause
+            exit 1
+        }
+    } finally {
+        Pop-Location
     }
-} finally {
-    Pop-Location
+    Write-Host "Build successful." -ForegroundColor Green
+} else {
+    Write-Host "Found pre-built tradingview-refresh.exe, skipping build step." -ForegroundColor Green
 }
-Write-Host "Build successful." -ForegroundColor Green
 
 # Create install directory
 Write-Host "Creating install directory: $InstallDir" -ForegroundColor Yellow
