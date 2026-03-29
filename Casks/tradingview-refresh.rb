@@ -12,4 +12,13 @@ cask "tradingview-refresh" do
   zap trash: [
     "~/Library/Application Support/TradingViewRefresh",
   ]
+
+  caveats <<~EOS
+    Because this application is not signed with an Apple Developer ID, macOS Gatekeeper will show a malware warning.
+    
+    To bypass Gatekeeper and allow the app to run, execute the following command in your terminal after installation:
+      xattr -cr /Applications/TradingViewRefresh.app
+      
+    Or, you can open Finder, navigate to Applications, Control-click (or Right-click) TradingView Refresh, and select "Open".
+  EOS
 end

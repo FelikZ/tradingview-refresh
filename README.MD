@@ -19,6 +19,11 @@ brew tap FelikZ/tradingview-refresh https://github.com/FelikZ/tradingview-refres
 brew install --cask tradingview-refresh
 ```
 
+> **Note on macOS Security (Gatekeeper):** Because this is not signed with a paid Apple Developer account, macOS will show a "cannot be verified" warning. After installing, bypass it by running:
+> ```bash
+> xattr -cr /Applications/TradingViewRefresh.app
+> ```
+
 *To upgrade via Homebrew:*
 ```bash
 brew update && brew upgrade --cask tradingview-refresh
